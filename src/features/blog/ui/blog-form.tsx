@@ -16,7 +16,7 @@ const BlogForm = () => {
       defaultValues={{
         name: "",
         content: "",
-        status: "draft",
+        status: "Draft",
         tags: "",
         slug: "",
         image: "",
