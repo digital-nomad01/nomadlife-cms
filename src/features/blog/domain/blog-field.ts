@@ -4,7 +4,6 @@ export const blogFields: FormFieldConfig[] = [
     {
         name: "name",
         label: "Name",
-        type: "text",
         fieldType: "input",
         placeholder: "Enter Blog",
         description: "This field will be publicly displayed.",
@@ -12,17 +11,26 @@ export const blogFields: FormFieldConfig[] = [
     {
         name: "content",
         label: "Content",
-        type: "text",
         fieldType: "textarea",
         placeholder: "Enter the content",
-        description: "This field will be publicly displayed.",
     },
     {
         name: "status",
         label: "Status",
-        type: "text",
         fieldType: "dropdown",
+        options: ["Draft","Published", "Archived"],
         placeholder: "Enter the content",
-        description: "This field will be publicly displayed.",
+    },
+    {
+        name: "tags",
+        label: "Tags",
+        fieldType: "tagpicker",
+        // placeholder: "",
+    },
+    {
+        name: "slug",
+        label: "Slug",
+        fieldType: "input",
+        placeholder: "Enter the slug",
     },
 ]
