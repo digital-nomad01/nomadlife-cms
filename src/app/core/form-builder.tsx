@@ -1,6 +1,7 @@
 import React from "react";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import {z} from "zod"
+import { ChevronDown } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
@@ -8,14 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-type FieldType = "input" | "textarea" | "dropdown";
+type FieldType = "input" | "textarea" | "dropdown" | "tagpicker";
 
 export type FormFieldConfig = {
     name: string;
     label: string;
-    type?: string; // Optional, defaults to 'text' for inputs
+    // type?: string; // Optional, defaults to 'text' for inputs
     fieldType: FieldType;
-    placeholder: string;
+    placeholder?: string;
     description?: string;
     options?: string[]; // For dropdowns
   };
@@ -50,15 +51,15 @@ export const FormBuilder = ({ fields, schema, onSubmit, submitButtonText, defaul
                   <FormControl>
                     {field.fieldType === "input" ? (
                       <Input
-                        type={field.type || "text"}
                         placeholder={field.placeholder}
                         {...formField}
                       />
                     ) : field.fieldType === "dropdown" ? (
-                      <DropdownMenu>
+                        <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="outline">
                             {formField.value || "Select an option"}
+                            <ChevronDown />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
@@ -72,7 +73,10 @@ export const FormBuilder = ({ fields, schema, onSubmit, submitButtonText, defaul
                           ))}
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    ) : (
+                    ) : field.fieldType === "tagpicker" ? (
+                        <div></div>
+                    )
+                     : (
                       <Textarea
                         placeholder={field.placeholder}
                         {...formField}
@@ -82,6 +86,7 @@ export const FormBuilder = ({ fields, schema, onSubmit, submitButtonText, defaul
                   {field.description && (
                     <FormDescription>{field.description}</FormDescription>
                   )}
+                  <FormMessage />
                 </FormItem>
               )}
             />
