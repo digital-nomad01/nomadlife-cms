@@ -8,6 +8,7 @@ const BlogForm = () => {
   };
 
   return (
+    <div className="w-1/3">
     <FormBuilder
       fields={blogFields}
       schema={blogSchema}
@@ -24,6 +25,7 @@ const BlogForm = () => {
         time_to_read: 0,
       }}
     />
+    </div>
   );
 };
 
