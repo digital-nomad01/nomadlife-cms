@@ -18,7 +18,7 @@ const BlogForm = () => {
         name: "",
         content: "",
         status: "Draft",
-        tags: "",
+        tags: [],
         slug: "",
         image: "",
         video: "",

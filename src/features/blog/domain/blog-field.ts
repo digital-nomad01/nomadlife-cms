@@ -25,7 +25,8 @@ export const blogFields: FormFieldConfig[] = [
         name: "tags",
         label: "Tags",
         fieldType: "tagpicker",
-        // placeholder: "",
+        placeholder: "Select or add tags",
+        tagOptions: ["Technology", "Lifestyle", "Travel", "Food"],
     },
     {
         name: "slug",
