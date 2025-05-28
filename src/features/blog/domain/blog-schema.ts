@@ -6,7 +6,7 @@ export const blogSchema = z.object({
     .min(1,{message: "Content is requirred"})
     .min(3,{ message:'Content should be atleast 3 characters'}),
     status: z.enum(['Draft', 'Published', 'Archived']),
-    tags: z.string(),
+    tags: z.array(z.string()).min(1,{message: "At least one tag is required"}),
     slug: z.string().optional(),
     // image: z.string().optional(),
     // video: z.string().optional(),
