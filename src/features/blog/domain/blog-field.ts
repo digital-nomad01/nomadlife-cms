@@ -13,6 +13,7 @@ export const blogFields: FormFieldConfig[] = [
         label: "Content",
         fieldType: "textarea",
         placeholder: "Enter the content",
+        description: "This input can be resized just by dragging from the bottom right corner.",
     },
     {
         name: "status",
@@ -34,4 +35,22 @@ export const blogFields: FormFieldConfig[] = [
         fieldType: "input",
         placeholder: "Enter the slug",
     },
+    {
+        name: "image",
+        label: "Image",
+        fieldType: "input",
+        placeholder: "Enter the image",
+    },
+    {
+        name: "video",
+        label: "Video",
+        fieldType: "input",
+        placeholder: "Enter the video",
+    },
+    // {
+    //     name: "time_to_read",
+    //     label: "Time to read",
+    //     fieldType: "input",
+    //     placeholder: "Enter the time to read",
+    // }
 ]
