@@ -3,28 +3,28 @@ import { FormFieldConfig } from "@/app/core/form-builder";
 export const blogFields: FormFieldConfig[] = [
     {
         name: "name",
-        label: "Name",
+        label: "Name *",
         fieldType: "input",
         placeholder: "Enter Blog",
         description: "This field will be publicly displayed.",
     },
     {
         name: "content",
-        label: "Content",
+        label: "Content *",
         fieldType: "textarea",
         placeholder: "Enter the content",
         description: "This input can be resized just by dragging from the bottom right corner.",
     },
     {
         name: "status",
-        label: "Status",
+        label: "Status *",
         fieldType: "dropdown",
         options: ["Draft","Published", "Archived"],
         placeholder: "Enter the content",
     },
     {
         name: "tags",
-        label: "Tags",
+        label: "Tags *",
         fieldType: "tagpicker",
         placeholder: "Select or add tags",
         tagOptions: ["Technology", "Lifestyle", "Travel", "Food"],
@@ -37,13 +37,13 @@ export const blogFields: FormFieldConfig[] = [
     },
     {
         name: "image",
-        label: "Image",
+        label: "Image *",
         fieldType: "input",
         placeholder: "Enter the image",
     },
     {
         name: "video",
-        label: "Video",
+        label: "Video *",
         fieldType: "input",
         placeholder: "Enter the video",
     },
