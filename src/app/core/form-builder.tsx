@@ -78,7 +78,9 @@ export const FormBuilder = ({
                 <FormLabel>{field.label}</FormLabel>
                 <FormControl>
                   {field.fieldType === "input" ? (
-                    <Input placeholder={field.placeholder} {...formField} />
+                    <Input placeholder={field.placeholder} {...formField} 
+                     type={field.name === "image" || field.name === "video" ? "file" : "text"}
+                    />
                   ) : field.fieldType === "dropdown" ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
