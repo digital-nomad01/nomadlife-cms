@@ -22,7 +22,7 @@ const BlogForm = () => {
         slug: "",
         image: "",
         video: "",
-        time_to_read: 0,
+        time_to_read: "",
       }}
     />
     </div>
