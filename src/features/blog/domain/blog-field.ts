@@ -38,19 +38,19 @@ export const blogFields: FormFieldConfig[] = [
     {
         name: "image",
         label: "Image *",
-        fieldType: "input",
+        fieldType: "file",
         placeholder: "Enter the image",
     },
     {
         name: "video",
         label: "Video *",
-        fieldType: "input",
+        fieldType: "file",
         placeholder: "Enter the video",
     },
-    // {
-    //     name: "time_to_read",
-    //     label: "Time to read",
-    //     fieldType: "input",
-    //     placeholder: "Enter the time to read",
-    // }
+    {
+        name: "time_to_read",
+        label: "Time to read",
+        fieldType: "input",
+        placeholder: "Enter the time to read",
+    }
 ]
