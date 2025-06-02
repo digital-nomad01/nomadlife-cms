@@ -16,6 +16,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/components/ui/radio-group"
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -26,11 +30,13 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
+  DialogTitle
 } from "@/components/ui/dialog";
-import { DialogTitle } from "@radix-ui/react-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
-type FieldType = "input" | "textarea" | "dropdown" | "tagpicker";
+type FieldType = "input" | "textarea" | "dropdown" | "tagpicker" | "file" | "checkbox" | "radio" | "datepicker" | "timepicker" | "switch" ;
 
 export type FormFieldConfig = {
   name: string;
@@ -77,9 +83,15 @@ export const FormBuilder = ({
               <FormItem>
                 <FormLabel>{field.label}</FormLabel>
                 <FormControl>
-                  {field.fieldType === "input" ? (
+                  {field.fieldType === "file" ? (
+                    <Input type="file" 
+                    onChange={(event) =>
+                      formField.onChange(event.target.files && event.target.files[0])
+                    }
+                    />
+                  ) :  field.fieldType === "input" ? (
                     <Input placeholder={field.placeholder} {...formField} 
-                     type={field.name === "image" || field.name === "video" ? "file" : "text"}
+                     type="text"
                     />
                   ) : field.fieldType === "dropdown" ? (
                     <DropdownMenu>
@@ -197,7 +209,25 @@ export const FormBuilder = ({
                         </DialogContent>
                       </Dialog>
                     </div>
-                  ) : (
+                  ) : field.fieldType === "checkbox" ? (
+                    <div className="flex items-center gap-2">
+                    <Checkbox 
+                     checked={formField.value}
+                     onCheckedChange={formField.onChange}
+                    />
+                    <Label className="text-sm">{field.label}</Label>
+                    </div>
+                  ) : field.fieldType === "radio" ? (
+                    <RadioGroup>
+                      {field.options?.map((option) => (
+                        <div key={option} className="flex items-center gap-2">
+                          <RadioGroupItem value={option} />
+                          <Label className="text-sm">{option}</Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  )
+                  : (
                     <Textarea placeholder={field.placeholder} {...formField} />
                   )}
                 </FormControl>
