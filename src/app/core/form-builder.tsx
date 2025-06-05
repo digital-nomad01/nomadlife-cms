@@ -32,11 +32,12 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
+import Tiptap from "@/components/ui/tiptap";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
-type FieldType = "input" | "textarea" | "dropdown" | "tagpicker" | "file" | "checkbox" | "radio" | "datepicker" | "timepicker" | "switch" ;
+type FieldType = "input" | "tiptap" | "textarea" | "dropdown" | "tagpicker" | "file" | "checkbox" | "radio" | "datepicker" | "timepicker" | "switch" ;
 
 export type FormFieldConfig = {
   name: string;
@@ -92,6 +93,11 @@ export const FormBuilder = ({
                   ) :  field.fieldType === "input" ? (
                     <Input placeholder={field.placeholder} {...formField} 
                      type="text"
+                    />
+                  ) : field.fieldType === "tiptap" ? (
+                    <Tiptap 
+                     content={formField.value}
+                     onChange={(content) => formField.onChange(content)}
                     />
                   ) : field.fieldType === "dropdown" ? (
                     <DropdownMenu>
