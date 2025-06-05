@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+.tiptap {
+  @apply p-4  bg-red-100;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
