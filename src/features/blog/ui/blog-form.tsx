@@ -1,11 +1,11 @@
 import { FormBuilder } from "@/app/core/form-builder";
 import { blogFields } from "@/features/blog/domain/blog-field";
 import { blogSchema } from "@/features/blog/domain/blog-schema";
+import { useBlog } from "./use-blog";
 
 const BlogForm = () => {
-  const handleSubmit = (data: any) => {
-    console.log("Blog form data is submitted>>>", data);
-  };
+
+  const {handleSubmit,isLoading} = useBlog();
 
   return (
     <div className="w-1/3">
@@ -13,11 +13,11 @@ const BlogForm = () => {
       fields={blogFields}
       schema={blogSchema}
       onSubmit={handleSubmit}
-      submitButtonText="Submit Blog"
+      submitButtonText={isLoading ? "Creating..." : "Submit Blog"}
       defaultValues={{
         name: "",
         content: "",
-        status: "Draft",
+        status: "draft",
         tags: [],
         slug: "",
         image: "",

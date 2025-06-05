@@ -19,7 +19,7 @@ export const blogFields: FormFieldConfig[] = [
         name: "status",
         label: "Status *",
         fieldType: "dropdown",
-        options: ["Draft","Published", "Archived"],
+        options: ["draft","published", "archived"],
         placeholder: "Enter the content",
     },
     {
