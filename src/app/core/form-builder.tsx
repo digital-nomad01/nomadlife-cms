@@ -35,8 +35,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import Tiptap from "../../components/ui/tiptap";
 
-type FieldType = "input" | "textarea" | "dropdown" | "tagpicker" | "file" | "checkbox" | "radio" | "datepicker" | "timepicker" | "switch" ;
+type FieldType = "input" | "textarea" | "dropdown" | "tagpicker" | "file" | "checkbox" | "radio" | "tiptap" ;
 
 export type FormFieldConfig = {
   name: string;
@@ -89,6 +90,8 @@ export const FormBuilder = ({
                       formField.onChange(event.target.files && event.target.files[0])
                     }
                     />
+                  ) : field.fieldType === "tiptap" ? (
+                    <Tiptap />
                   ) :  field.fieldType === "input" ? (
                     <Input placeholder={field.placeholder} {...formField} 
                      type="text"
