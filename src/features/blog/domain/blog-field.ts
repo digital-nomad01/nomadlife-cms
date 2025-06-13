@@ -11,9 +11,9 @@ export const blogFields: FormFieldConfig[] = [
     {
         name: "content",
         label: "Content *",
-        fieldType: "textarea",
+        fieldType: "tiptap",
         placeholder: "Enter the content",
-        description: "This input can be resized just by dragging from the bottom right corner.",
+        // description: "This input can be resized just by dragging from the bottom right corner.",
     },
     {
         name: "status",
