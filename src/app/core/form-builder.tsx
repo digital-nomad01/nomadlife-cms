@@ -16,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
 import {
   RadioGroup,
   RadioGroupItem,
@@ -37,8 +38,10 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import Tiptap from "../../components/ui/tiptap";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
 
-type FieldType = "input" | "textarea" | "dropdown" | "tagpicker" | "file" | "checkbox" | "radio" | "tiptap" ;
+type FieldType = "input" | "textarea" | "dropdown" | "tagpicker" | "file" | "checkbox" | "radio" | "tiptap" | "date";
 
 export type FormFieldConfig = {
   name: string;
@@ -48,6 +51,7 @@ export type FormFieldConfig = {
   description?: string;
   options?: string[];
   tagOptions?: string[];
+  inputType?: string; // for input fields (text, number, email, etc.)
 };
 
 export type ReusableFormProps = {
@@ -73,6 +77,11 @@ export const FormBuilder = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newTag, setNewTag] = useState("");
 
+  // Reset form when defaultValues change
+  React.useEffect(() => {
+    form.reset(defaultValues);
+  }, [defaultValues, form]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -92,10 +101,12 @@ export const FormBuilder = ({
                     }
                     />
                   ) : field.fieldType === "tiptap" ? (
-                    <Tiptap />
+                    <Tiptap value={formField.value} onChange={formField.onChange} />
                   ) :  field.fieldType === "input" ? (
-                    <Input placeholder={field.placeholder} {...formField} 
-                     type="text"
+                    <Input
+                      placeholder={field.placeholder}
+                      {...formField}
+                      type={field.inputType || "text"}
                     />
                   ) : field.fieldType === "dropdown" ? (
                     <DropdownMenu>
@@ -230,6 +241,23 @@ export const FormBuilder = ({
                         </div>
                       ))}
                     </RadioGroup>
+                  ) : field.fieldType === "date" ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline">
+                          {formField.value ? format(formField.value, "PPP") : "Pick a date"}
+                          <ChevronDown />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={formField.value}
+                          onSelect={formField.onChange}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   )
                   : (
                     <Textarea placeholder={field.placeholder} {...formField} />
