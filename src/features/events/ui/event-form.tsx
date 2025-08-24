@@ -11,7 +11,7 @@ interface EventFormProps {
 }
 
 const EventForm = ({ eventId, onSuccess }: EventFormProps) => {
-  const { handleSubmit, isLoading, getEvent, updateEvent } = useEvent();
+  const { handleSubmit, isLoading, getEvent, updateEvent, uploadImage } = useEvent();
   const [eventData, setEventData] = useState<EventRow | null>(null);
   const [isEdit, setIsEdit] = useState(false);
 
@@ -23,9 +23,19 @@ const EventForm = ({ eventId, onSuccess }: EventFormProps) => {
       });
     }
   }, [eventId]);
+  
+
 
   const handleFormSubmit = async (data: EventInput) => {
     if (isEdit && eventId) {
+      // For edit mode, we need to handle image upload too
+      let imagePath = eventData?.image; // Keep existing image by default
+      
+      if (data.image) {
+        // If new image is selected, upload it
+        imagePath = await uploadImage(data.image);
+      }
+      
       const result = await updateEvent(eventId, {
         title: data.title,
         description: data.description,
@@ -38,11 +48,16 @@ const EventForm = ({ eventId, onSuccess }: EventFormProps) => {
         price: data.price ?? null,
         status: data.status,
         tags: data.tags ?? [],
+        image: imagePath, // Add this line
         is_online: data.is_online ?? false,
       });
       if (result && onSuccess) onSuccess();
     } else {
-      await handleSubmit(data);
+      if (data.image) {
+        const imagePath = await uploadImage(data.image);
+        if(imagePath) data.image = imagePath as unknown as File;
+      }
+      await handleSubmit(data); // This already handles image upload
       if (onSuccess) onSuccess();
     }
   };
@@ -61,7 +76,7 @@ const EventForm = ({ eventId, onSuccess }: EventFormProps) => {
         price: eventData.price || 0,
         status: eventData.status,
         tags: eventData.tags || [],
-        image: undefined, // File inputs can't be pre-filled
+        image: eventData.image, // File inputs can't be pre-filled
         is_online: eventData.is_online || false,
       };
     }
@@ -92,6 +107,7 @@ const EventForm = ({ eventId, onSuccess }: EventFormProps) => {
     );
   }
 
+  console.log(getDefaultValues());
   return (
     <div className="w-full max-w-2xl">
       <FormBuilder

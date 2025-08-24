@@ -94,12 +94,36 @@ export const FormBuilder = ({
               <FormItem>
                 <FormLabel>{field.label}</FormLabel>
                 <FormControl>
-                  {field.fieldType === "file" ? (
-                    <Input type="file" 
-                    onChange={(event) =>
-                      formField.onChange(event.target.files && event.target.files[0])
-                    }
-                    />
+                  {
+                  field.fieldType === "file" ? (
+                    <div className="space-y-3">
+                      <Input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={(event) => {
+                          const file = event.target.files && event.target.files[0];
+                          formField.onChange(file);
+                        }}
+                      />
+                      {/* Show existing image preview */}
+                      {formField.value && typeof formField.value === 'string' && (
+                       <div className="relative aspect-video w-full max-w-sm bg-gray-100 rounded-lg overflow-hidden">
+                       <img 
+                         src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/events/${formField.value}`}
+                         alt="Current uploaded image"
+                         className="w-full h-full object-cover transition-transform hover:scale-105"
+                         onError={(e) => {
+                           const target = e.target as HTMLImageElement;
+                           target.style.display = 'none';
+                           const parent = target.parentElement;
+                           if (parent) {
+                             parent.innerHTML = '<div class="w-full h-full bg-gray-200 flex items-center justify-center"><p class="text-sm text-red-500">Image not found</p></div>';
+                           }
+                         }}
+                       />
+                     </div>
+                      )}
+                    </div>
                   ) : field.fieldType === "tiptap" ? (
                     <Tiptap value={formField.value} onChange={formField.onChange} />
                   ) :  field.fieldType === "input" ? (

@@ -32,6 +32,8 @@ interface UseEventReturn {
   getEvent: (id: string) => Promise<EventRow | null>
   updateEvent: (id: string, updates: Partial<EventRow>) => Promise<EventRow | null>
   deleteEvent: (id: string) => Promise<boolean>
+  uploadImage: (file?: File) => Promise<string | null>
+  getImageUrl: (path: string) => string | null
 }
 
 export function useEvent(): UseEventReturn {
@@ -40,11 +42,25 @@ export function useEvent(): UseEventReturn {
   const [success, setSuccess] = useState(false)
   const supabase = createClient()
 
+  const deleteImage = async (path: string) => {
+    if (!path) return
+    const { error } = await supabase.storage
+      .from('events')
+      .remove([path])
+    if (error) console.warn('Failed to delete image:', error.message)
+  }
+
   const uploadImage = async (file?: File) => {
     if (!file) return null
+
+    const fileExt = file.name.split('.').pop()
+    const shortId = Date.now().toString(36) + Math.random().toString(36).substring(2, 5)
+    const fileName = `${shortId}.${fileExt}` // ~10-12 chars + extension
+  
+    
     const { data, error: supabaseError } = await supabase.storage
       .from('events')
-      .upload(file.name, file, {
+      .upload(fileName, file, {
         contentType: file.type,
         upsert: true,
         cacheControl: '3600',
@@ -93,6 +109,12 @@ export function useEvent(): UseEventReturn {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const getImageUrl = (path: string) => {
+    if (!path) return null
+    const { data } = supabase.storage.from('events').getPublicUrl(path)
+    return data.publicUrl
   }
 
   const listEvents = async () => {
@@ -160,11 +182,17 @@ export function useEvent(): UseEventReturn {
   const deleteEvent = async (id: string) => {
     try {
       setIsLoading(true)
+      const event = await getEvent(id)
       const { error: supabaseError } = await supabase
         .from('events')
         .delete()
         .eq('id', id)
+
       if (supabaseError) throw new Error(supabaseError.message)
+
+      if (event?.image) {
+        await deleteImage(event.image)
+      }
       setSuccess(true)
       return true
     } catch (err) {
@@ -192,6 +220,8 @@ export function useEvent(): UseEventReturn {
     getEvent,
     updateEvent,
     deleteEvent,
+    uploadImage,
+    getImageUrl,
   }
 }
 

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useEvent, type EventRow } from "./use-event";
 import { Button } from "@/components/ui/button";
+import { ImageIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -67,6 +68,13 @@ const EventTable = () => {
           <tbody>
             {rows.map((r) => (
               <tr key={r.id} className="border-t">
+                <td className="p-3">
+                  {r.image ? (
+                    <img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/events/${r.image}`} alt={r.title} className="w-10 h-10 object-cover rounded-full" />
+                  ) : (
+                    <ImageIcon className="w-10 h-10 text-gray-500" />
+                  )}
+                </td>
                 <td className="p-3 font-medium">{r.title}</td>
                 <td className="p-3">{new Date(r.start_date).toLocaleDateString()}</td>
                 <td className="p-3">{r.location}</td>
