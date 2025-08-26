@@ -40,6 +40,8 @@ import { Label } from "@/components/ui/label";
 import Tiptap from "../../components/ui/tiptap";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
+// Import amenity helpers
+import { getAmenityConfig } from "@/features/spaces/domain/amenity-config";
 
 type FieldType = "input" | "textarea" | "dropdown" | "tagpicker" | "file" | "checkbox" | "radio" | "tiptap" | "date";
 
@@ -52,6 +54,7 @@ export type FormFieldConfig = {
   options?: string[];
   tagOptions?: string[];
   inputType?: string; // for input fields (text, number, email, etc.)
+  bucket?: string; // storage bucket for file preview
 };
 
 export type ReusableFormProps = {
@@ -82,6 +85,24 @@ export const FormBuilder = ({
     form.reset(defaultValues);
   }, [defaultValues, form]);
 
+  // Helper function to render tag with icon if it's an amenity
+  const renderTagWithIcon = (tag: string, field: FormFieldConfig) => {
+    // Check if this is an amenities field and has config
+    if (field.name === "amenities") {
+      const config = getAmenityConfig(tag);
+      if (config) {
+        const IconComponent = config.icon;
+        return (
+          <span className="flex items-center gap-1">
+            <IconComponent size={12} />
+            {config.label}
+          </span>
+        );
+      }
+    }
+    return tag;
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -109,7 +130,7 @@ export const FormBuilder = ({
                       {formField.value && typeof formField.value === 'string' && (
                        <div className="relative aspect-video w-full max-w-sm bg-gray-100 rounded-lg overflow-hidden">
                        <img 
-                         src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/events/${formField.value}`}
+                         src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${field.bucket ?? 'events'}/${formField.value}`}
                          alt="Current uploaded image"
                          className="w-full h-full object-cover transition-transform hover:scale-105"
                          onError={(e) => {
@@ -158,37 +179,47 @@ export const FormBuilder = ({
                         variant="outline"
                         onClick={() => setDialogOpen(true)}
                       >
-                        {formField.value.length > 0
-                          ? `Selected: ${formField.value.join(",")}`
+                        {Array.isArray(formField.value) && formField.value.length > 0
+                          ? `Selected: ${formField.value.length} items`
                           : "Select Tags"}
                       </Button>
                       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                        <DialogContent>
+                        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                           <DialogHeader>
-                            <DialogTitle>Select or Add Tags</DialogTitle>
+                            <DialogTitle>Select {field.label}</DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4">
-                            <div className="flex flex-wrap gap-2">
-                              {formField.value.map((tag: string) => (
-                                <Badge
-                                  key={tag}
-                                  variant="secondary"
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    formField.onChange(
-                                      formField.value.filter(
-                                        (t: string) => t !== tag
+                            {/* Selected items */}
+                            <div>
+                              <h4 className="font-medium mb-2">Selected ({(formField.value || []).length})</h4>
+                              <div className="flex flex-wrap gap-2">
+                                {Array.isArray(formField.value) && formField.value.map((tag: string) => (
+                                  <Badge
+                                    key={tag}
+                                    variant="secondary"
+                                    className="cursor-pointer hover:bg-red-100"
+                                    onClick={() =>
+                                      formField.onChange(
+                                        (formField.value || []).filter(
+                                          (t: string) => t !== tag
+                                        )
                                       )
-                                    )
-                                  }
-                                >
-                                  {tag}
-                                </Badge>
-                              ))}
+                                    }
+                                  >
+                                    {renderTagWithIcon(tag, field)}
+                                    <span className="ml-1 text-xs">×</span>
+                                  </Badge>
+                                ))}
+                                {!(Array.isArray(formField.value) && formField.value.length > 0) && (
+                                  <p className="text-sm text-gray-500">No items selected</p>
+                                )}
+                              </div>
                             </div>
+
+                            {/* Add custom tag */}
                             <div className="flex gap-2">
                               <Input
-                                placeholder="Add new tag"
+                                placeholder="Add custom tag"
                                 value={newTag}
                                 onChange={(e) => setNewTag(e.target.value)}
                               />
@@ -197,7 +228,7 @@ export const FormBuilder = ({
                                 onClick={() => {
                                   if (
                                     newTag &&
-                                    !formField.value.includes(newTag)
+                                    !(formField.value || []).includes(newTag)
                                   ) {
                                     formField.onChange([
                                       ...(formField.value || []),
@@ -207,42 +238,57 @@ export const FormBuilder = ({
                                   }
                                 }}
                               >
-                                Add Tag
+                                Add Custom
                               </Button>
                             </div>
-                            <div className="flex flex-wrap gap-2">
-                              {field.tagOptions?.map((tag) => (
-                                <Badge
-                                  key={tag}
-                                  variant={
-                                    formField.value.includes(tag)
-                                      ? "default"
-                                      : "outline"
-                                  }
-                                  className="cursor-pointer"
-                                  onClick={() => {
-                                    if (formField.value?.includes(tag)) {
-                                      formField.onChange(
-                                        formField.value.filter(
-                                          (t: string) => t !== tag
-                                        )
-                                      );
-                                    } else {
-                                      formField.onChange([
-                                        ...(formField.value || []),
-                                        tag,
-                                      ]);
-                                    }
-                                  }}
-                                >
-                                  {tag}
-                                </Badge>
-                              ))}
+
+                            {/* Available options */}
+                            <div>
+                              <h4 className="font-medium mb-2">Available Options</h4>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                {field.tagOptions?.map((tag) => {
+                                  const isSelected = (formField.value || []).includes(tag);
+                                  const config = field.name === "amenities" ? getAmenityConfig(tag) : null;
+                                  
+                                  return (
+                                    <div
+                                      key={tag}
+                                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                                        isSelected
+                                          ? "bg-red-50 border-red-200 text-red-700"
+                                          : "bg-white border-gray-200 hover:bg-gray-50"
+                                      }`}
+                                      onClick={() => {
+                                        const currentValue = formField.value || [];
+                                        if (currentValue.includes(tag)) {
+                                          formField.onChange(
+                                            currentValue.filter((t: string) => t !== tag)
+                                          );
+                                        } else {
+                                          formField.onChange([...currentValue, tag]);
+                                        }
+                                      }}
+                                    >
+                                      {config ? (
+                                        <div className="flex items-center gap-2">
+                                          <config.icon size={16} className="flex-shrink-0" />
+                                          <div className="min-w-0">
+                                            <div className="font-medium text-sm">{config.label}</div>
+                                            <div className="text-xs text-gray-500 truncate">{config.description}</div>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <div className="font-medium text-sm">{tag}</div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
                             </div>
                           </div>
                           <DialogFooter>
                             <Button onClick={() => setDialogOpen(false)}>
-                              Done
+                              Done ({(formField.value || []).length} selected)
                             </Button>
                           </DialogFooter>
                         </DialogContent>
