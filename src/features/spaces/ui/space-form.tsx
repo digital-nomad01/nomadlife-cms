@@ -12,6 +12,7 @@ import { attractionSchema, type AttractionInput } from "@/features/spaces/domain
 import { useSpace, type SpaceRow } from "./use-space";
 import { useOffer, type OfferRow } from "./use-offer";
 import { useAttraction, type AttractionRow } from "./use-attraction";
+import ImageGallery from "./image-gallery";
 
 interface SpaceFormProps {
   spaceId?: string;
@@ -543,6 +544,13 @@ const SpaceForm = ({ spaceId, onSuccess }: SpaceFormProps) => {
         </div>
       )}
 
+      {/* Image Gallery Section */}
+      {isEdit && spaceId && (
+        <div className="border-t pt-8">
+          <ImageGallery spaceId={spaceId} />
+        </div>
+      )}
+
       {/* Info message for cafe spaces */}
       {isEdit && spaceData?.space_type === 'coworking_cafe' && (
         <div className="border-t pt-8">
@@ -559,5 +567,6 @@ const SpaceForm = ({ spaceId, onSuccess }: SpaceFormProps) => {
 };
 
 export default SpaceForm;
+
 
 
