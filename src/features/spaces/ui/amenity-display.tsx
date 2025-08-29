@@ -80,3 +80,4 @@ export const AmenityBadge: React.FC<{ amenityName: string }> = ({ amenityName })
     </span>
   );
 };
+

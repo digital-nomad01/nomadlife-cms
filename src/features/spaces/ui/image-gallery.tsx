@@ -155,35 +155,39 @@ const ImageGallery = ({ spaceId }: ImageGalleryProps) => {
               onDrop={(e) => handleDrop(e, index)}
               className="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-move border border-gray-200 hover:border-gray-300 transition-colors"
             >
+              {/* Image - moved to be first to ensure proper z-index */}
+              <img
+                src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/spaces/${image.path}`}
+                alt={image.alt || `Space image ${index + 1}`}
+                className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  console.error('Image failed to load:', target.src);
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'absolute inset-0 w-full h-full bg-gray-200 flex items-center justify-center';
+                    errorDiv.innerHTML = '<p class="text-sm text-red-500">Image not found</p>';
+                    parent.appendChild(errorDiv);
+                  }
+                }}
+              />
+
               {/* Position indicator */}
               <Badge 
                 variant="secondary" 
-                className="absolute top-2 left-2 z-10 text-xs bg-white/90"
+                className="absolute top-2 left-2 z-20 text-xs bg-white/90"
               >
                 {index + 1}
               </Badge>
 
               {/* Drag handle */}
-              <GripVertical className="absolute top-2 right-2 z-10 w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-sm" />
+              <GripVertical className="absolute top-2 right-2 z-20 w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-sm" />
 
-              {/* Image */}
-              <img
-                src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/spaces/${image.path}`}
-                alt={image.alt || `Space image ${index + 1}`}
-                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  const parent = target.parentElement;
-                  if (parent) {
-                    parent.innerHTML = '<div class="w-full h-full bg-gray-200 flex items-center justify-center"><p class="text-sm text-red-500">Image not found</p></div>';
-                  }
-                }}
-              />
-
-              {/* Overlay with controls */}
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-end">
-                <div className="w-full p-2 transform translate-y-full group-hover:translate-y-0 transition-transform duration-200">
+              {/* Overlay with controls - fixed z-index and hover behavior */}
+              <div className="absolute inset-0 z-10 bg-transparent group-hover:bg-black/50 transition-all duration-200 flex items-end opacity-0 group-hover:opacity-100">
+                <div className="w-full p-2">
                   <div className="flex gap-1">
                     <Button
                       size="sm"
@@ -205,7 +209,7 @@ const ImageGallery = ({ spaceId }: ImageGalleryProps) => {
 
               {/* Alt text */}
               {image.alt && (
-                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white text-xs p-1 truncate">
+                <div className="absolute bottom-0 left-0 right-0 z-15 bg-black/75 text-white text-xs p-1 truncate">
                   {image.alt}
                 </div>
               )}

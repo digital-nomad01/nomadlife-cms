@@ -77,13 +77,31 @@ export const FormBuilder = ({
     defaultValues,
   });
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [newTag, setNewTag] = useState("");
+  // Use a map to track dialog states for each field
+  const [dialogStates, setDialogStates] = useState<Record<string, boolean>>({});
+  const [newTagStates, setNewTagStates] = useState<Record<string, string>>({});
 
   // Reset form when defaultValues change
   React.useEffect(() => {
     form.reset(defaultValues);
   }, [defaultValues, form]);
+
+  // Helper functions to manage dialog states per field
+  const openDialog = (fieldName: string) => {
+    setDialogStates(prev => ({ ...prev, [fieldName]: true }));
+  };
+
+  const closeDialog = (fieldName: string) => {
+    setDialogStates(prev => ({ ...prev, [fieldName]: false }));
+  };
+
+  const setNewTag = (fieldName: string, value: string) => {
+    setNewTagStates(prev => ({ ...prev, [fieldName]: value }));
+  };
+
+  const getNewTag = (fieldName: string) => {
+    return newTagStates[fieldName] || "";
+  };
 
   // Helper function to render tag with icon if it's an amenity
   const renderTagWithIcon = (tag: string, field: FormFieldConfig) => {
@@ -102,6 +120,213 @@ export const FormBuilder = ({
     }
     return tag;
   };
+
+  // Special amenities modal renderer
+  const renderAmenitiesModal = (field: FormFieldConfig, formField: any) => (
+    <Dialog 
+      open={dialogStates[field.name] || false} 
+      onOpenChange={(open) => open ? openDialog(field.name) : closeDialog(field.name)}
+    >
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Select Amenities</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-6">
+          {/* Selected amenities */}
+          <div>
+            <h4 className="font-medium mb-3">Selected Amenities ({(formField.value || []).length})</h4>
+            <div className="flex flex-wrap gap-2">
+              {Array.isArray(formField.value) && formField.value.map((amenity: string) => {
+                const config = getAmenityConfig(amenity);
+                return (
+                  <Badge
+                    key={amenity}
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-red-100 flex items-center gap-1 px-3 py-1"
+                    onClick={() =>
+                      formField.onChange(
+                        (formField.value || []).filter(
+                          (t: string) => t !== amenity
+                        )
+                      )
+                    }
+                  >
+                    {config && <config.icon size={14} />}
+                    {config?.label || amenity}
+                    <span className="ml-1 text-xs">×</span>
+                  </Badge>
+                );
+              })}
+              {!(Array.isArray(formField.value) && formField.value.length > 0) && (
+                <p className="text-sm text-gray-500">No amenities selected</p>
+              )}
+            </div>
+          </div>
+
+          {/* Available amenities */}
+          <div>
+            <h4 className="font-medium mb-3">Available Amenities</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {field.tagOptions?.map((amenity) => {
+                const isSelected = (formField.value || []).includes(amenity);
+                const config = getAmenityConfig(amenity);
+                
+                if (!config) return null; // Only show amenities with valid config
+                
+                return (
+                  <div
+                    key={amenity}
+                    className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                      isSelected
+                        ? "bg-red-50 border-red-200 text-red-700 shadow-sm"
+                        : "bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                    }`}
+                    onClick={() => {
+                      const currentValue = formField.value || [];
+                      if (currentValue.includes(amenity)) {
+                        formField.onChange(
+                          currentValue.filter((t: string) => t !== amenity)
+                        );
+                      } else {
+                        formField.onChange([...currentValue, amenity]);
+                      }
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-red-500">
+                        <config.icon size={18} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-sm mb-1">{config.label}</div>
+                        <div className="text-xs text-gray-500 leading-relaxed">{config.description}</div>
+                      </div>
+                      {isSelected && (
+                        <div className="flex-shrink-0 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center">
+                          <span className="text-xs">✓</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button onClick={() => closeDialog(field.name)} className="bg-red-600 hover:bg-red-700">
+            Done ({(formField.value || []).length} selected)
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+
+  // Generic tagpicker modal renderer
+  const renderGenericTagpickerModal = (field: FormFieldConfig, formField: any) => (
+    <Dialog 
+      open={dialogStates[field.name] || false} 
+      onOpenChange={(open) => open ? openDialog(field.name) : closeDialog(field.name)}
+    >
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Select {field.label}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          {/* Selected items */}
+          <div>
+            <h4 className="font-medium mb-2">Selected ({(formField.value || []).length})</h4>
+            <div className="flex flex-wrap gap-2">
+              {Array.isArray(formField.value) && formField.value.map((tag: string) => (
+                <Badge
+                  key={tag}
+                  variant="secondary"
+                  className="cursor-pointer hover:bg-red-100"
+                  onClick={() =>
+                    formField.onChange(
+                      (formField.value || []).filter(
+                        (t: string) => t !== tag
+                      )
+                    )
+                  }
+                >
+                  {renderTagWithIcon(tag, field)}
+                  <span className="ml-1 text-xs">×</span>
+                </Badge>
+              ))}
+              {!(Array.isArray(formField.value) && formField.value.length > 0) && (
+                <p className="text-sm text-gray-500">No items selected</p>
+              )}
+            </div>
+          </div>
+
+          {/* Add custom tag */}
+          <div className="flex gap-2">
+            <Input
+              placeholder="Add custom tag"
+              value={getNewTag(field.name)}
+              onChange={(e) => setNewTag(field.name, e.target.value)}
+            />
+            <Button
+              type="button"
+              onClick={() => {
+                const newTagValue = getNewTag(field.name);
+                if (
+                  newTagValue &&
+                  !(formField.value || []).includes(newTagValue)
+                ) {
+                  formField.onChange([
+                    ...(formField.value || []),
+                    newTagValue,
+                  ]);
+                  setNewTag(field.name, "");
+                }
+              }}
+            >
+              Add Custom
+            </Button>
+          </div>
+
+          {/* Available options */}
+          <div>
+            <h4 className="font-medium mb-2">Available Options</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {field.tagOptions?.map((tag) => {
+                const isSelected = (formField.value || []).includes(tag);
+                
+                return (
+                  <div
+                    key={tag}
+                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                      isSelected
+                        ? "bg-red-50 border-red-200 text-red-700"
+                        : "bg-white border-gray-200 hover:bg-gray-50"
+                    }`}
+                    onClick={() => {
+                      const currentValue = formField.value || [];
+                      if (currentValue.includes(tag)) {
+                        formField.onChange(
+                          currentValue.filter((t: string) => t !== tag)
+                        );
+                      } else {
+                        formField.onChange([...currentValue, tag]);
+                      }
+                    }}
+                  >
+                    <div className="font-medium text-sm">{tag}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button onClick={() => closeDialog(field.name)}>
+            Done ({(formField.value || []).length} selected)
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 
   return (
     <Form {...form}>
@@ -177,122 +402,21 @@ export const FormBuilder = ({
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setDialogOpen(true)}
+                        onClick={() => openDialog(field.name)}
                       >
                         {Array.isArray(formField.value) && formField.value.length > 0
-                          ? `Selected: ${formField.value.length} items`
-                          : "Select Tags"}
+                          ? field.name === "amenities" 
+                            ? `${formField.value.length} amenities selected`
+                            : `Selected: ${formField.value.length} items`
+                          : field.name === "amenities" 
+                            ? "Select Amenities" 
+                            : "Select Tags"}
                       </Button>
-                      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                          <DialogHeader>
-                            <DialogTitle>Select {field.label}</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            {/* Selected items */}
-                            <div>
-                              <h4 className="font-medium mb-2">Selected ({(formField.value || []).length})</h4>
-                              <div className="flex flex-wrap gap-2">
-                                {Array.isArray(formField.value) && formField.value.map((tag: string) => (
-                                  <Badge
-                                    key={tag}
-                                    variant="secondary"
-                                    className="cursor-pointer hover:bg-red-100"
-                                    onClick={() =>
-                                      formField.onChange(
-                                        (formField.value || []).filter(
-                                          (t: string) => t !== tag
-                                        )
-                                      )
-                                    }
-                                  >
-                                    {renderTagWithIcon(tag, field)}
-                                    <span className="ml-1 text-xs">×</span>
-                                  </Badge>
-                                ))}
-                                {!(Array.isArray(formField.value) && formField.value.length > 0) && (
-                                  <p className="text-sm text-gray-500">No items selected</p>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Add custom tag */}
-                            <div className="flex gap-2">
-                              <Input
-                                placeholder="Add custom tag"
-                                value={newTag}
-                                onChange={(e) => setNewTag(e.target.value)}
-                              />
-                              <Button
-                                type="button"
-                                onClick={() => {
-                                  if (
-                                    newTag &&
-                                    !(formField.value || []).includes(newTag)
-                                  ) {
-                                    formField.onChange([
-                                      ...(formField.value || []),
-                                      newTag,
-                                    ]);
-                                    setNewTag("");
-                                  }
-                                }}
-                              >
-                                Add Custom
-                              </Button>
-                            </div>
-
-                            {/* Available options */}
-                            <div>
-                              <h4 className="font-medium mb-2">Available Options</h4>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                {field.tagOptions?.map((tag) => {
-                                  const isSelected = (formField.value || []).includes(tag);
-                                  const config = field.name === "amenities" ? getAmenityConfig(tag) : null;
-                                  
-                                  return (
-                                    <div
-                                      key={tag}
-                                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                                        isSelected
-                                          ? "bg-red-50 border-red-200 text-red-700"
-                                          : "bg-white border-gray-200 hover:bg-gray-50"
-                                      }`}
-                                      onClick={() => {
-                                        const currentValue = formField.value || [];
-                                        if (currentValue.includes(tag)) {
-                                          formField.onChange(
-                                            currentValue.filter((t: string) => t !== tag)
-                                          );
-                                        } else {
-                                          formField.onChange([...currentValue, tag]);
-                                        }
-                                      }}
-                                    >
-                                      {config ? (
-                                        <div className="flex items-center gap-2">
-                                          <config.icon size={16} className="flex-shrink-0" />
-                                          <div className="min-w-0">
-                                            <div className="font-medium text-sm">{config.label}</div>
-                                            <div className="text-xs text-gray-500 truncate">{config.description}</div>
-                                          </div>
-                                        </div>
-                                      ) : (
-                                        <div className="font-medium text-sm">{tag}</div>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          </div>
-                          <DialogFooter>
-                            <Button onClick={() => setDialogOpen(false)}>
-                              Done ({(formField.value || []).length} selected)
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
+                      {/* Conditional modal rendering */}
+                      {field.name === "amenities" 
+                        ? renderAmenitiesModal(field, formField)
+                        : renderGenericTagpickerModal(field, formField)
+                      }
                     </div>
                   ) : field.fieldType === "checkbox" ? (
                     <div className="flex items-center gap-2">
