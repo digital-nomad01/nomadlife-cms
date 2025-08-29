@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
 import {
@@ -42,6 +43,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 // Import amenity helpers
 import { getAmenityConfig } from "@/features/spaces/domain/amenity-config";
+import Image from "next/image";
 
 type FieldType = "input" | "textarea" | "dropdown" | "tagpicker" | "file" | "checkbox" | "radio" | "tiptap" | "date";
 
@@ -354,9 +356,11 @@ export const FormBuilder = ({
                       {/* Show existing image preview */}
                       {formField.value && typeof formField.value === 'string' && (
                        <div className="relative aspect-video w-full max-w-sm bg-gray-100 rounded-lg overflow-hidden">
-                       <img 
+                       <Image 
                          src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${field.bucket ?? 'events'}/${formField.value}`}
                          alt="Current uploaded image"
+                         width={400}
+                         height={300}
                          className="w-full h-full object-cover transition-transform hover:scale-105"
                          onError={(e) => {
                            const target = e.target as HTMLImageElement;

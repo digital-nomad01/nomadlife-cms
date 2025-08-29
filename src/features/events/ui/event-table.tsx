@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useEvent, type EventRow } from "./use-event";
 import { Button } from "@/components/ui/button";
 import { ImageIcon } from "lucide-react";
@@ -27,7 +28,7 @@ const EventTable = () => {
       const data = await listEvents();
       if (data) setRows(data);
     })();
-  }, []); // Remove listEvents dependency to prevent infinite re-rendering
+  }, [listEvents]);
 
   const handleEdit = (id?: string) => {
     if (id) router.push(`/events/${id}`);
@@ -70,7 +71,13 @@ const EventTable = () => {
               <tr key={r.id} className="border-t">
                 <td className="p-3">
                   {r.image ? (
-                    <img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/events/${r.image}`} alt={r.title} className="w-10 h-10 object-cover rounded-full" />
+                    <Image 
+                      src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/events/${r.image}`} 
+                      alt={r.title} 
+                      width={40}
+                      height={40}
+                      className="w-10 h-10 object-cover rounded-full" 
+                    />
                   ) : (
                     <ImageIcon className="w-10 h-10 text-gray-500" />
                   )}
@@ -112,7 +119,7 @@ const EventTable = () => {
           <DialogHeader>
             <DialogTitle>Delete Event</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{deleteDialog.event?.title}"? This action cannot be undone.
+              Are you sure you want to delete &quot;{deleteDialog.event?.title}&quot;? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

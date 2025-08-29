@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { type OfferInput } from '../domain/offer-schema'

@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import Image from "next/image";
 
 const SpaceTable = () => {
   const router = useRouter();
@@ -28,7 +29,7 @@ const SpaceTable = () => {
       const data = await listSpaces();
       if (data) setRows(data);
     })();
-  }, []);
+  }, [listSpaces]);
 
   const handleEdit = (id?: string) => {
     if (id) router.push(`/spaces/${id}`);
@@ -72,7 +73,13 @@ const SpaceTable = () => {
               <tr key={r.id} className="border-t">
                 <td className="p-3">
                   {r.image ? (
-                    <img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/spaces/${r.image}`} alt={r.name} className="w-10 h-10 object-cover rounded-full" />
+                    <Image 
+                      src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/spaces/${r.image}`} 
+                      alt={r.name} 
+                      width={40}
+                      height={40}
+                      className="w-10 h-10 object-cover rounded-full" 
+                    />
                   ) : (
                     <ImageIcon className="w-10 h-10 text-gray-500" />
                   )}
@@ -130,7 +137,7 @@ const SpaceTable = () => {
           <DialogHeader>
             <DialogTitle>Delete Space</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{deleteDialog.space?.name}"? This action cannot be undone.
+              Are you sure you want to delete &quot;{deleteDialog.space?.name}&quot;? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

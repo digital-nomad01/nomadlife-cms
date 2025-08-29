@@ -22,7 +22,7 @@ const EventForm = ({ eventId, onSuccess }: EventFormProps) => {
         if (data) setEventData(data);
       });
     }
-  }, [eventId]);
+  }, [eventId, getEvent]);
   
 
 

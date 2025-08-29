@@ -57,7 +57,7 @@ const TiptapEditor = ({ value, onChange }: TiptapProps) => {
   }, [editor]);
 
   const toggleHeading = useCallback(
-    (level: any) => {
+    (level: 1 | 2 | 3 | 4 | 5 | 6) => {
       editor?.chain().focus().toggleHeading({ level }).run();
     },
     [editor]

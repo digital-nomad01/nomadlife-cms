@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { 
   Wifi, 
   Snowflake, 
@@ -15,7 +16,6 @@ import {
   Users,
   Clock,
   Printer,
-  Scan,
   Users as MeetingRoom,
   Mountain,
   Sun

@@ -37,6 +37,17 @@ const SpaceForm = ({ spaceId, onSuccess }: SpaceFormProps) => {
   const [showAttractionForm, setShowAttractionForm] = useState(false);
   const [editingAttraction, setEditingAttraction] = useState<AttractionRow | null>(null);
 
+
+  const loadOffers = async (spaceId: string) => {
+    const data = await getOffers(spaceId);
+    setOffers(data);
+  };
+
+  const loadAttractions = async (spaceId: string) => {
+    const data = await getAttractions(spaceId);
+    setAttractions(data);
+  };
+
   useEffect(() => {
     if (spaceId) {
       setIsEdit(true);
@@ -49,17 +60,8 @@ const SpaceForm = ({ spaceId, onSuccess }: SpaceFormProps) => {
         }
       });
     }
-  }, [spaceId]);
+  }, [spaceId, getSpace]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const loadOffers = async (spaceId: string) => {
-    const data = await getOffers(spaceId);
-    setOffers(data);
-  };
-
-  const loadAttractions = async (spaceId: string) => {
-    const data = await getAttractions(spaceId);
-    setAttractions(data);
-  };
 
   const handleFormSubmit = async (data: SpaceInput) => {
     if (isEdit && spaceId) {

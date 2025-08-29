@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -17,14 +18,14 @@ const ImageGallery = ({ spaceId }: ImageGalleryProps) => {
   const [editingAlt, setEditingAlt] = useState<{ id: string; alt: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    loadImages();
-  }, [spaceId]);
-
-  const loadImages = async () => {
+  const loadImages = useCallback(async () => {
     const data = await getSpaceImages(spaceId);
     setImages(data);
-  };
+  }, [getSpaceImages, spaceId]);
+
+  useEffect(() => {
+    loadImages();
+  }, [loadImages]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -118,9 +119,11 @@ const ImageGallery = ({ spaceId }: ImageGalleryProps) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {uploadingFiles.map((file, index) => (
               <div key={index} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                <img
+                <Image
                   src={URL.createObjectURL(file)}
                   alt={file.name}
+                  width={400}
+                  height={400}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -156,9 +159,11 @@ const ImageGallery = ({ spaceId }: ImageGalleryProps) => {
               className="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-move border border-gray-200 hover:border-gray-300 transition-colors"
             >
               {/* Image - moved to be first to ensure proper z-index */}
-              <img
+              <Image
                 src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/spaces/${image.path}`}
                 alt={image.alt || `Space image ${index + 1}`}
+                width={400}
+                height={400}
                 className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
